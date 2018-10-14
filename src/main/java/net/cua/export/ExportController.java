@@ -10,11 +10,12 @@ import java.util.Map;
 
 /**
  * Excel Export controller
+ * use curl -O url for test
  * Create by guanquan.wang at 2018-10-13 14:01
  */
 @RestController
 @RequestMapping("/export")
-public class Controller {
+public class ExportController {
     @Autowired
     ExportService service;
     @Autowired
