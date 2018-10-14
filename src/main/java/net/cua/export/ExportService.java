@@ -30,7 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class ExportService {
     @Autowired
-    DataSource dataSource;
+    private DataSource dataSource;
 
     @Value("${excel.creator}")
     private String creator;

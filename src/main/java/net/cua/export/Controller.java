@@ -2,7 +2,6 @@ package net.cua.export;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -10,7 +9,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * Export controller
+ * Excel Export controller
  * Create by guanquan.wang at 2018-10-13 14:01
  */
 @RestController

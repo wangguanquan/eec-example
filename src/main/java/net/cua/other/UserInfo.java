@@ -56,4 +56,36 @@ public class UserInfo {
     public void setC(char c) {
         this.c = c;
     }
+
+    public int getChannelId() {
+        return channelId;
+    }
+
+    public String getPro() {
+        return pro;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public Timestamp getRegistered() {
+        return registered;
+    }
+
+    public boolean isUp30() {
+        return up30;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public char getC() {
+        return c;
+    }
 }
