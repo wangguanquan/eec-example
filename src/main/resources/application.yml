@@ -5,13 +5,12 @@ spring:
   profiles: develop
   dataSource:
         driverClassName: com.mysql.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/job?useUnicode=true&characterEncoding=utf-8&useSSL=true
+        url: jdbc:mysql://localhost:3306/eec?useUnicode=true&characterEncoding=utf-8&useSSL=true
         username: root
         password: root
 
 ---
 excel:
   creator: guanquan.wang
-  company: Copyright© 2012-2018 版权所有 苏州工品汇信息科技有限公司
   storage:
     path: ./excel

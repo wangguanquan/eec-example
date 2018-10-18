@@ -41,16 +41,20 @@ public class ImportController {
         if (!name.endsWith(Const.Suffix.EXCEL_07)) {
             name += Const.Suffix.EXCEL_07;
         }
-        return service.show(name, sheet) + Const.lineSeparator;
+        return service.show(name, sheet);
     }
 
     /**
-     *
+     * eq: curl
+     * -d "from=Map%26Object.xlsx.Object%E6%B5%8B%E8%AF%95"
+     * -d "where=%E6%B8%B8%E6%88%8F%3DLOL"
+     * -d "limit=5"
+     * -d "select=%E6%B8%B8%E6%88%8F%2Caccount%2C%E6%B3%A8%E5%86%8C%E6%97%B6%E9%97%B4%2C%E6%98%AF%E5%90%A6%E6%BB%A130%E7%BA%A7"
+     * "http://localhost:8080/search"
      * 数据查询
      * @param select 要查看的结果字段
      * @param from 查看哪个Excel，也可以使用excel.sheet指定到具体的sheet
      * @param where 查询条件
-     * @param order 排序
      * @param limit limit
      * @return
      */
@@ -58,9 +62,9 @@ public class ImportController {
     public String search(@RequestParam(value = "select", required = false) String select
             , @RequestParam("from") String from
             , @RequestParam(value = "where", required = false) String where
-            , @RequestParam(value = "order", required = false) String order
-            , @RequestParam(value = "limit", required = false) int limit
+            , @RequestParam(value = "limit", defaultValue = "-1") int limit
     ) throws IOException {
-        return service.search(select, from, where, order, limit) + Const.lineSeparator;
+        return service.search(select, from, where, limit);
     }
+
 }

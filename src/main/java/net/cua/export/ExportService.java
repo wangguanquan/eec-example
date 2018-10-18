@@ -101,10 +101,11 @@ public class ExportService {
                     , new Sheet.Column("状态", char.class, c -> c == 0 ? "正常" : "停用")
                         .setStyleProcessor((n, style, sst) -> {
                             if ((int)n != 0) {
-                                // 背景设红, 字体改为斜体
-                                int s = sst.addFill(new Fill(Color.red))
-                                        | sst.addFont(sst.getFont(style).italic());
-                                style = Styles.reset(style, s);
+                                // 背景设红,
+                                style = Styles.clearFill(style) | sst.addFill(new Fill(Color.red));
+                                // 字体改为斜体
+                                int italic = sst.addFont(sst.getFont(style).clone().italic());
+                                style = Styles.clearFont(style) | italic;
                             }
                             // 文本左右居中
                             style = Styles.clearHorizontal(style) | Horizontals.CENTER;
@@ -121,12 +122,12 @@ public class ExportService {
      * 取消隔行变色
      * use Workbook.cancelOddStyle() or Sheet.cancelOddStyle()
      */
-    public void cancelOddStyle(OutputStream os) {
+    public void cancelOddFill(OutputStream os) {
         try (Connection con = dataSource.getConnection()) {
             Workbook wb = new Workbook("单页-固定宽度-ThreeZero样式-测试", creator)
                     .setConnection(con)
                     .setCompany(company)
-                    .cancelOddStyle(); // 取消隔行变色
+                    .cancelOddFill(); // 取消隔行变色
 
             // 申请number format
             int newFmt =  wb.getStyles().addNumFmt(new NumFmt("0.000_);[Red]\\(0.000\\)"));

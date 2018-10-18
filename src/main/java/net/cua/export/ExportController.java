@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * Excel Export controller
- * use curl -O url for test
+ * use curl -o {name} url for test
  * Create by guanquan.wang at 2018-10-13 14:01
  */
 @RestController
@@ -50,11 +50,11 @@ public class ExportController {
      * @param response
      * @throws IOException
      */
-    @RequestMapping("/cancelOddStyle")
-    public void cancelOddStyle(HttpServletResponse response) throws IOException {
+    @RequestMapping("/cancelOddFill")
+    public void cancelOddFill(HttpServletResponse response) throws IOException {
         String fileName =  java.net.URLEncoder.encode("取消隔行颜色.xlsx", "UTF-8");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"; filename*=utf-8''" + fileName);
-        service.cancelOddStyle(response.getOutputStream());
+        service.cancelOddFill(response.getOutputStream());
     }
 
     /**
@@ -74,7 +74,7 @@ public class ExportController {
      * @param response
      * @throws IOException
      */
-    @RequestMapping(value = "/mapTemp", method = RequestMethod.POST)
+    @PostMapping(value = "/mapTemp")
     public void mapTemp(@RequestBody Map<String, ?> map, HttpServletResponse response) throws IOException {
         String fileName =  java.net.URLEncoder.encode("Map数组模板.xlsx", "UTF-8");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"; filename*=utf-8''" + fileName);
@@ -86,7 +86,7 @@ public class ExportController {
      * @param response
      * @throws IOException
      */
-    @RequestMapping(value = "/objectTemp", method = RequestMethod.POST)
+    @PostMapping(value = "/objectTemp")
     public void objectTemp(@RequestBody TemplateService.BindEntity entity, HttpServletResponse response) throws IOException {
         String fileName =  java.net.URLEncoder.encode("Object数组模板.xlsx", "UTF-8");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"; filename*=utf-8''" + fileName);

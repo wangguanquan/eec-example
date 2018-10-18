@@ -25,4 +25,67 @@ public class Regist {
     @DisplayName("状态")
     private String platform;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getPro_id() {
+        return pro_id;
+    }
+
+    public void setPro_id(int pro_id) {
+        this.pro_id = pro_id;
+    }
+
+    public int getChannel_no() {
+        return channel_no;
+    }
+
+    public void setChannel_no(int channel_no) {
+        this.channel_no = channel_no;
+    }
+
+    public int getAid() {
+        return aid;
+    }
+
+    public void setAid(int aid) {
+        this.aid = aid;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    public Timestamp getRegist_time() {
+        return regist_time;
+    }
+
+    public void setRegist_time(Timestamp regist_time) {
+        this.regist_time = regist_time;
+    }
+
+    public int getUid() {
+        return uid;
+    }
+
+    public void setUid(int uid) {
+        this.uid = uid;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
 }

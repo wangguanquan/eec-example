@@ -6,9 +6,6 @@ import net.cua.excel.reader.Row;
 import net.cua.excel.reader.Sheet;
 import net.cua.excel.util.FileUtil;
 import net.cua.excel.util.StringUtil;
-import net.cua.other.Fill;
-import net.cua.other.Regist;
-import net.cua.other.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,11 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -87,14 +80,14 @@ public class ImportService {
      * @param select 要查看的结果字段
      * @param from 查看哪个Excel，也可以使用excel.sheet指定到具体的sheet
      * @param where 查询条件
-     * @param order 排序
      * @param limit limit
      * @return
      */
-    public String search(String select, String from, String where, String order, int limit) throws IOException {
+    public String search(String select, String from, String where, int limit) throws IOException {
         if (StringUtil.isEmpty(from)) {
             return "请指定Excel文件名或文件名.Sheet名，eq: from=学生成绩.xlsx 或 from=学生成绩.xlsx.三年级一班";
         }
+        createBase();
         int name_index = from.indexOf(Const.Suffix.EXCEL_07);
         String name;
         if (name_index < 0) {
@@ -108,7 +101,7 @@ public class ImportService {
         if (!Files.exists(path)) {
             return "文件[" + name + "]不存在.";
         }
-        String sheetName = name_index <= from.length() ? from.substring(name_index + 1) : null;
+        String sheetName = name_index < from.length() ? from.substring(name_index + 1) : null;
 
         StringJoiner joiner = new StringJoiner(Const.lineSeparator);
         try (ExcelReader reader = ExcelReader.read(path)) {
@@ -116,17 +109,23 @@ public class ImportService {
 
             List<String> headers = new ArrayList<>();
             if (sheetName == null) {
-                stream = reader.sheets().flatMap(sheet -> {
-                    Stream<Row> rows = sheet.rowsWithOutHeader();
+                for (Sheet sheet : reader.all())
                     headers.add(sheet.getHeader().toString());
-                    return rows;
-                });
             } else {
                 Sheet sheet = reader.sheet(sheetName);
                 if (sheet == null)
                     return "文件[" + name + "]中不存在名为[" + sheetName + "]的Sheet";
-                stream = sheet.rowsWithOutHeader();
                 headers.add(sheet.getHeader().toString());
+            }
+
+            if (sheetName == null) {
+                stream = reader.sheets().flatMap(Sheet::dataRows);
+            } else {
+                stream = reader.sheet(sheetName).dataRows();
+            }
+
+            if (headers.isEmpty()) {
+                return "文件[" + name + "]内容为空.";
             }
 
             // check header
@@ -136,11 +135,11 @@ public class ImportService {
                     equals = headers.get(i - 1).equals(headers.get(i));
                 }
                 if (!equals) {
-                    return name + "存在多个多Sheet并且各Sheet头部信息不一致.";
+                    return name + "存在多个多Sheet并且各Sheet头部信息不一致.请指定具体的Sheet页再操作。eq: from=学生成绩.xlsx.三年级一班";
                 }
             }
 
-            String[] headerName = headers.get(0).split("[|]");
+            String[] headerName = Arrays.stream(headers.get(0).split("[|]")).map(String::trim).toArray(String[]::new);
 
             int[] indexs = null;
             if (StringUtil.isNotEmpty(select) && select.charAt(0) != '*') {
@@ -163,39 +162,44 @@ public class ImportService {
                     n = StringUtil.indexOf(headerName, k);
                     if (n < 0) return k + "在" + name + "中不存在.";
                     final int _n = n;
-                    stream.filter(row -> v.equals(row.getString(_n)));
+                    stream = stream.filter(row -> v.equals(row.getString(_n)));
                 }
             }
 
             // order
-            if (StringUtil.isNotEmpty(order)) {
-                int n;
-                String k = order.substring(0, n = order.indexOf(' ')).trim(), v = order.substring(n + 1).trim();
-                final int index = StringUtil.indexOf(headerName, k);
-                if ("asc".equalsIgnoreCase(v)) {
-                    stream.sorted(Comparator.comparing(row -> row.getString(index)));
-                } else {
-                    stream.sorted((x, y) -> y.getString(index).compareTo(x.getString(index)));
-                }
-            }
+            // 行数据是内存共享的，所以不能排序，内存中只保留一行数据
 
             // limit
             if (limit > 0) {
-                stream.limit(limit);
+                stream = stream.limit(limit);
             }
 
             // select *
             if (indexs == null) {
+                // append header
+                joiner.add(headers.get(0));
+                // append rows
                 stream.forEach(row -> joiner.add(row.toString()));
             } else {
+                // append header
                 StringBuilder buf = new StringBuilder();
+                buf.append(headerName[indexs[0]]);
+                for (int i = 1; i < indexs.length; i++) {
+                    buf.append(" | ").append(headerName[indexs[i]]);
+                }
+                joiner.add(buf.toString());
+                // append rows
                 final int[] findexs = indexs;
                 stream.forEach(row -> {
                     buf.delete(0, buf.length());
-                    for (int n : findexs) buf.append(row.getString(n));
+                    buf.append(row.getString(findexs[0]));
+                    for (int i = 1; i < findexs.length; i++) {
+                        buf.append(" | ").append(row.getString(findexs[i]));
+                    }
                     joiner.add(buf.toString());
                 });
             }
+            stream.close();
         }
         return joiner.toString();
     }
@@ -209,9 +213,8 @@ public class ImportService {
             // get first sheet
             Sheet sheet = reader.sheet(0);
             // skip header row
-            sheet.nextRow();
-
-            while ((row = sheet.nextRow()) != null) {
+            for (Iterator<Row> iterator = sheet.dataIterator(); iterator.hasNext(); ) {
+                row = iterator.next();
                 System.out.println(row.getInt(0) + " | "
                         + row.getInt(1) + " | "
                         + row.getInt(2) + " | "
@@ -239,208 +242,6 @@ public class ImportService {
                     ite.hasNext();
                     System.out.println(ite.next())
                     );
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 多个sheet页读取
-     */
-    public void reader() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("New name.xlsx"))) {
-            reader.sheets().flatMap(sheet -> {
-                System.out.println();
-                System.out.println("第" + sheet.getIndex() + "个sheet页：" + sheet.getName());
-                return sheet.rows();
-            }).forEach(System.out::println);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将Excel数据导入到数据库
-     */
-    public void import0() {
-        try (Connection con = dataSource.getConnection();
-             ExcelReader reader = ExcelReader.read(basePath.resolve("200万-自动宽度-转化-测试 (1).xlsx"))) {
-            // close auto commit
-            boolean autoCommit;
-            if (autoCommit = con.getAutoCommit()) {
-                con.setAutoCommit(false);
-            }
-            reader.sheets().forEach(s -> {
-                System.out.println("开始导入" + s.getName());
-                try {
-                    PreparedStatement ps = con.prepareStatement("insert into wh_regist(pro_id,channel_no,aid,account,regist_time,uid,platform_type) values(?,?,?,?,?,?,?)");
-                    // 丢弃表头
-                    s.nextRow();
-                    Row row;
-                    int n = 0;
-                    while ((row = s.nextRow()) != null) {
-                        // set parameters
-                        // skip id column row.get(0)
-                        ps.setInt(1, row.getInt(1));
-                        ps.setString(2, row.getString(2));
-                        ps.setInt(3, row.getInt(3));
-                        ps.setString(4, row.getString(4));
-                        ps.setTimestamp(5, row.getTimestamp(5));
-                        ps.setInt(6, row.getInt(6));
-
-                        int platform;
-                        switch (row.getString(7)) {
-                            case "iOS":
-                                platform = 1;
-                                break;
-                            case "Android":
-                                platform = 2;
-                                break;
-                            case "PC":
-                                platform = 3;
-                                break;
-                            default:
-                                platform = 0;
-                        }
-                        ps.setInt(7, platform);
-                        ps.addBatch();
-                        if (n++ % 100_000 == 0) {
-                            ps.executeBatch();
-                            con.commit();
-                        }
-                    }
-                    ps.executeBatch();
-                    ps.close();
-                    con.commit();
-                    System.out.println("导入{}成功." + s.getName());
-                } catch (SQLException | IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            if (autoCommit) {
-                con.setAutoCommit(true);
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * read excel to object array
-     */
-    public void excelToArray() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("New name.xlsx"))) {
-            UserInfo[] array = reader.sheet(2)
-                    .rowsWithOutHeader()
-                    .map(row -> row.to(UserInfo.class))
-                    .toArray(UserInfo[]::new);
-
-            for (UserInfo e : array) {
-                System.out.println(e);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * read with filter
-     */
-    public void readWithFilter() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("New name.xlsx"))) {
-            List<UserInfo> list = reader.sheet(2)
-                    .rowsWithOutHeader()
-                    .map(row -> row.to(UserInfo.class))
-                    .filter(UserInfo::isUp30)
-                    .collect(Collectors.toList());
-
-            for (UserInfo e : list) {
-                System.out.println(e);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * memory share object
-     */
-    public void readToOnceObject() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("New name.xlsx"))) {
-            reader.sheet(2)
-                    .rowsWithOutHeader()
-                    .map(row -> row.too(UserInfo.class))
-                    .filter(UserInfo::isUp30)
-                    .forEach(System.out::println);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // <13
-    public void line200w() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("200万注册.xlsx"))) {
-            long count = reader.sheets().flatMap(Sheet::rows).limit(100L).count();
-            System.out.println(count);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // 13~15
-    public void line200wToObject() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("200万注册.xlsx"))) {
-            long count = reader.sheets().flatMap(Sheet::rowsWithOutHeader).map(row -> row.to(Regist.class)).count();
-            System.out.println(count);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // < 13
-    public void line200wTooObject() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("200万注册.xlsx"))) {
-            long count = reader.sheets().flatMap(Sheet::rowsWithOutHeader).map(row -> row.too(Regist.class)).count();
-            System.out.println(count);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // < 30
-    public void line1000w() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("1000万用户充值.xlsx"))) {
-            long count = reader.sheets().flatMap(Sheet::rows).count();
-            System.out.println(count);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // 32~34
-    public void line1000wToObject() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("1000万用户充值.xlsx"))) {
-            long count = reader.sheets().flatMap(Sheet::rowsWithOutHeader).map(row -> row.to(Fill.class)).count();
-            System.out.println(count);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // 32~34
-    public void line1000wTooObject() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("1000万用户充值.xlsx"))) {
-            long count = reader.sheets().flatMap(Sheet::rowsWithOutHeader).map(row -> row.too(Fill.class)).count();
-            System.out.println(count);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void lineCount() {
-        try (ExcelReader reader = ExcelReader.read(basePath.resolve("多表-自动宽度-转化-样式-测试 (1).xlsx"))) {
-            long count = reader.sheets().flatMap(Sheet::rowsWithOutHeader).count();
-            System.out.println(count);
         } catch (IOException e) {
             e.printStackTrace();
         }
