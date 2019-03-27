@@ -1,4 +1,4 @@
-package net.cua.other;
+package cn.ttzero.other;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;

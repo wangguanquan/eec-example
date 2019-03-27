@@ -1,13 +1,14 @@
-package net.cua.export;
+package cn.ttzero.export;
 
-import net.cua.excel.entity.ExportException;
-import net.cua.excel.entity.WaterMark;
-import net.cua.excel.entity.e7.EmptySheet;
-import net.cua.excel.entity.e7.Sheet;
-import net.cua.excel.entity.e7.Workbook;
-import net.cua.excel.entity.e7.style.*;
-import net.cua.excel.entity.e7.style.Font;
-import net.cua.other.UserInfo;
+import cn.ttzero.excel.entity.ExportException;
+import cn.ttzero.excel.entity.WaterMark;
+import cn.ttzero.excel.entity.e7.EmptySheet;
+import cn.ttzero.excel.entity.e7.Sheet;
+import cn.ttzero.excel.entity.e7.Workbook;
+import cn.ttzero.excel.entity.style.*;
+import cn.ttzero.excel.entity.style.Font;
+import cn.ttzero.excel.manager.Const;
+import cn.ttzero.other.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,9 +41,9 @@ public class ExportService {
     private String path;
 
     /* 产口列表 */
-    final String[] pros = {"", "LOL", "WOW", "极品飞车", "守望先锋", "怪物世界", "天堂", "吃鸡", "炉石传说", "星际2", "魔兽世界"};
+    private final String[] pros = {"", "LOL", "WOW", "极品飞车", "守望先锋", "怪物世界", "天堂", "吃鸡", "炉石传说", "星际2", "魔兽世界"};
     /* 设置值是否共享 */
-    final boolean share = true;
+    private final boolean share = true;
 
     /**
      * 导出充值表
@@ -60,7 +61,7 @@ public class ExportService {
                     , new Sheet.Column("ID", int.class)
                     , new Sheet.Column("AID", int.class)
                     , new Sheet.Column("产品ID", int.class, i -> pros[i], share) // 设置共享
-                    , new Sheet.Column("充值金额", int.class).setType(Sheet.Column.TYPE_RMB)
+                    , new Sheet.Column("充值金额", int.class).setType(Const.ColumnType.RMB)
                     , new Sheet.Column("充值时间", Timestamp.class)
                     , new Sheet.Column("是否使用", boolean.class)
                 )
@@ -277,7 +278,7 @@ public class ExportService {
                 new Sheet.Column("ID", int.class)
                 , new Sheet.Column("AID", int.class)
                 , new Sheet.Column("游戏编号", int.class)
-                , new Sheet.Column("充值金额", int.class).setType(Sheet.Column.TYPE_RMB)
+                , new Sheet.Column("充值金额", int.class).setType(Const.ColumnType.RMB)
                 , new Sheet.Column("充值时间", Timestamp.class)
                 , new Sheet.Column("是否使用", int.class)
             };
@@ -320,7 +321,7 @@ public class ExportService {
                             , new Sheet.Column("AID", int.class)
                             , new Sheet.Column("游戏", int.class, n -> pros[n], share)
                                     .setCellStyle(Styles.clearHorizontal(Styles.defaultStringBorderStyle()) | Horizontals.CENTER)
-                            , new Sheet.Column("充值金额", int.class).setType(Sheet.Column.TYPE_RMB)
+                            , new Sheet.Column("充值金额", int.class).setType(Const.ColumnType.RMB)
                             , new Sheet.Column("日期", Date.class)
                             , new Sheet.Column("帐号", String.class)
                             , new Sheet.Column("平台", int.class, i -> i == 1 ? "Android" : "iOS")

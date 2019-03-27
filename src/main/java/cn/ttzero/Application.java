@@ -1,4 +1,4 @@
-package net.cua;
+package cn.ttzero;
 
 import com.alibaba.druid.pool.DruidDataSourceFactory;
 import org.springframework.boot.SpringApplication;

@@ -1,6 +1,6 @@
-package net.cua.other;
+package cn.ttzero.other;
 
-import net.cua.excel.annotation.DisplayName;
+import cn.ttzero.excel.annotation.DisplayName;
 
 import java.sql.Timestamp;
 

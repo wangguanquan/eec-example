@@ -12,5 +12,6 @@ spring:
 ---
 excel:
   creator: guanquan.wang
+  company: cn.ttzero
   storage:
     path: ./excel
