@@ -1,7 +1,7 @@
 package cn.ttzero.other;
 
-import cn.ttzero.excel.annotation.DisplayName;
-import cn.ttzero.excel.annotation.NotExport;
+import org.ttzero.excel.annotation.ExcelColumn;
+import org.ttzero.excel.annotation.IgnoreExport;
 
 import java.sql.Timestamp;
 
@@ -9,20 +9,20 @@ import java.sql.Timestamp;
  * Create by guanquan.wang at 2018-10-13 15:59
  */
 public class UserInfo {
-    @DisplayName("渠道ID")
+    @ExcelColumn("渠道ID")
     private int channelId;
-    @DisplayName(value = "游戏", share = true)
+    @ExcelColumn(value = "游戏", share = true)
     private String pro;
-    @DisplayName
+    @ExcelColumn
     private String account;
-    @DisplayName("注册时间")
+    @ExcelColumn("注册时间")
     private Timestamp registered;
-    @DisplayName("是否满30级")
+    @ExcelColumn("是否满30级")
     private boolean up30;
-    @NotExport("敏感信息不导出")
+    @IgnoreExport("敏感信息不导出")
     private int id; // not export
     private String address;
-    @DisplayName("VIP")
+    @ExcelColumn("VIP")
     private char c;
 
     public void setChannelId(int channelId) {

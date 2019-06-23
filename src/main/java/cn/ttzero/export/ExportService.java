@@ -1,28 +1,38 @@
 package cn.ttzero.export;
 
-import cn.ttzero.excel.entity.ExportException;
-import cn.ttzero.excel.entity.WaterMark;
-import cn.ttzero.excel.entity.e7.EmptySheet;
-import cn.ttzero.excel.entity.e7.Sheet;
-import cn.ttzero.excel.entity.e7.Workbook;
-import cn.ttzero.excel.entity.style.*;
-import cn.ttzero.excel.entity.style.Font;
-import cn.ttzero.excel.manager.Const;
+import org.ttzero.excel.entity.WaterMark;
+import org.ttzero.excel.entity.EmptySheet;
+import org.ttzero.excel.entity.Sheet;
+import org.ttzero.excel.entity.Workbook;
+import org.ttzero.excel.entity.style.Border;
+import org.ttzero.excel.entity.style.BorderStyle;
+import org.ttzero.excel.entity.style.Charset;
+import org.ttzero.excel.entity.style.Fill;
+import org.ttzero.excel.entity.style.Font;
+import org.ttzero.excel.entity.style.Horizontals;
+import org.ttzero.excel.entity.style.NumFmt;
+import org.ttzero.excel.entity.style.PatternType;
+import org.ttzero.excel.entity.style.Styles;
+import org.ttzero.excel.manager.Const;
 import cn.ttzero.other.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -66,7 +76,7 @@ public class ExportService {
                     , new Sheet.Column("是否使用", boolean.class)
                 )
                 .writeTo(os);
-        } catch (SQLException | IOException | ExportException e) {
+        } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -114,7 +124,7 @@ public class ExportService {
                         }).setWidth(6.38) // 重新设定宽度
                 )
                 .writeTo(os);
-        } catch (SQLException | IOException | ExportException e) {
+        } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -146,7 +156,7 @@ public class ExportService {
                 , new Sheet.Column("更新时间", Timestamp.class)
                 , new Sheet.Column("更新者", String.class)
             ).writeTo(os);
-        } catch (SQLException | IOException | ExportException e) {
+        } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -160,10 +170,7 @@ public class ExportService {
         Workbook wb = new Workbook("List<?>-Map<String, ?>-测试", creator)
             .setAutoSize(true) // Auto-size
             .setWaterMark(WaterMark.of("colvin"));
-        wb.addSheet(new EmptySheet(wb, "空数据"
-            , new Sheet.Column("姓名", String.class)
-            , new Sheet.Column("性别", String.class)
-        ).hidden()); // 设置此Sheet为隐藏
+        wb.addSheet(new EmptySheet().hidden()); // 设置此Sheet为隐藏
 
         java.util.List<Map<String, Object>> mapData = new ArrayList<>();
         for (int i = 0; i < 251; i++) {
@@ -233,7 +240,7 @@ public class ExportService {
         );
         try {
             wb.writeTo(os);
-        } catch (IOException | ExportException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
@@ -259,7 +266,7 @@ public class ExportService {
                     , new Sheet.Column("是否使用", int.class)
                 )
                 .writeTo(Paths.get(path));
-        } catch (SQLException | IOException | ExportException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -296,7 +303,7 @@ public class ExportService {
                 );
             }
             wb.writeTo(Paths.get(path));
-        } catch (SQLException | IOException | ExportException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -330,7 +337,7 @@ public class ExportService {
                             , new Sheet.Column("渠道分成", double.class)
                     )
                     .writeTo(Paths.get(path));
-        } catch (SQLException | IOException | ExportException e) {
+        } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -356,7 +363,7 @@ public class ExportService {
                             , new Sheet.Column("状态", char.class, c -> c == 0 ? "正常" : "停用")
                     )
                     .writeTo(Paths.get(path));
-        } catch (SQLException | IOException | ExportException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
     }

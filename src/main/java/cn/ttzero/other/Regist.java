@@ -1,6 +1,6 @@
 package cn.ttzero.other;
 
-import cn.ttzero.excel.annotation.DisplayName;
+import org.ttzero.excel.annotation.ExcelColumn;
 
 import java.sql.Timestamp;
 
@@ -8,21 +8,21 @@ import java.sql.Timestamp;
  * Create by guanquan.wang at 2018-10-14
  */
 public class Regist {
-    @DisplayName("ID")
+    @ExcelColumn("ID")
     private int id;
-    @DisplayName("产品ID")
+    @ExcelColumn("产品ID")
     private int pro_id;
-    @DisplayName("渠道ID")
+    @ExcelColumn("渠道ID")
     private int channel_no;
-    @DisplayName("AID")
+    @ExcelColumn("AID")
     private int aid;
-    @DisplayName("注册账号")
+    @ExcelColumn("注册账号")
     private String account;
-    @DisplayName("注册时间")
+    @ExcelColumn("注册时间")
     private Timestamp regist_time;
-    @DisplayName("CPS用户ID")
+    @ExcelColumn("CPS用户ID")
     private int uid;
-    @DisplayName("状态")
+    @ExcelColumn("状态")
     private String platform;
 
     public int getId() {
