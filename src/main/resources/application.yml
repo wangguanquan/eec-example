@@ -4,8 +4,8 @@ spring:
 spring:
   profiles: develop
   dataSource:
-        driverClassName: com.mysql.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/eec?useUnicode=true&characterEncoding=utf-8&useSSL=true
+        driver-class-name: org.sqlite.JDBC
+        url: jdbc:sqlite:target/eec-test.db
         username: root
         password: root
 

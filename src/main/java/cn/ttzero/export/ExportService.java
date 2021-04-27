@@ -150,7 +150,7 @@ public class ExportService {
                 , new Sheet.Column("渠道类型", int.class)
                 , new Sheet.Column("分成比例", double.class)
                     // 小数点后保留3位
-                    .setCellStyle(Styles.clearNumfmt(Styles.defaultDoubleBorderStyle()) | newFmt)// 方式1 效率更高
+                    .setCellStyle(Styles.clearNumFmt(Styles.defaultDoubleBorderStyle()) | newFmt)// 方式1 效率更高
 //                    .setStyleProcessor((o, style, sst) -> Styles.clearNumfmt(style) | sst.addNumFmt(new NumFmt("0.000_);[Red]\\(0.000\\)"))) // 方式2
                 , new Sheet.Column("下载链接", String.class)
                 , new Sheet.Column("更新时间", Timestamp.class)
@@ -202,7 +202,7 @@ public class ExportService {
         fill.setFgColor(Color.GRAY);
         fill.setBgColor(Color.decode("#ccff00"));
 
-        Font font = new Font("Klee", 14, Font.Style.bold, Color.white);
+        Font font = new Font("Klee", 14, Font.Style.BOLD, Color.white);
         font.setCharset(Charset.GB2312);
         wb.getSheet("Map测试").setHeadStyle(font, fill, border);
 

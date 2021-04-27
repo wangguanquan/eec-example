@@ -1,6 +1,7 @@
 package cn.ttzero._import;
 
 import org.ttzero.excel.manager.Const;
+import org.ttzero.excel.reader.Drawings;
 import org.ttzero.excel.reader.ExcelReader;
 import org.ttzero.excel.reader.Row;
 import org.ttzero.excel.reader.Sheet;
@@ -66,6 +67,11 @@ public class ImportService {
         }
         StringJoiner joiner = new StringJoiner(Const.lineSeparator);
         try (ExcelReader reader = ExcelReader.read(path)) {
+
+            for (Drawings.Picture pic : reader.listPictures()) {
+                Files.copy(pic.getLocalPath(), Paths.get("/Users/wangguanquan/Documents/", pic.getLocalPath().getFileName().toString()));
+            }
+
             if (sheet != -1) {
                 reader.sheet(sheet).rows().forEach(row -> joiner.add(row.toString()));
             } else {
